@@ -1,0 +1,2 @@
+[496] 01 May 15:12:07.281 # Creating Server TCP listening socket 127.0.0.1:6379: unable to bind socket
+[816] 01 May 15:12:42.899 # Creating Server TCP listening socket 127.0.0.1:6379: unable to bind socket
