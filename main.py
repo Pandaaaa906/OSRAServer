@@ -63,6 +63,8 @@ class OrsaTask(object):
             # TODO Should get file type, base64 data at one regx
             ft, suffix = re.search(r'(image)/(\w+)', img_data).groups()
             self.fp = path.join(self.upload_path, "%s.%s" % (self.pk, suffix))
+            if not path.exists(self.upload_path):
+                os.makedirs(self.upload_path)
             with open(self.fp, 'wb') as f:
                 img_base64 = img_data[img_data.find('base64,') + 7:]
                 data = base64.b64decode(img_base64)
@@ -82,12 +84,12 @@ class OrsaTask(object):
 
     @property
     def mol_fp(self):
-        return path.join(self.base_dir, "static\\mols\\%s.mol" % self.pk)
+        return path.join(self.base_dir, "static/mols/%s.mol" % self.pk)
 
     @celery.task
     def osra(self):
         binary_image_file(self.fp)
-        imago_fp = os.path.join(self.base_dir, "imago\\imago_console.exe")
+        imago_fp = path.join(self.base_dir, "imago/imago_console")
         args = [self.fp, "-o", self.mol_fp]
         command = ' '.join([imago_fp] + args)
         p = subprocess.Popen(command, stdout=subprocess.PIPE,
@@ -95,6 +97,7 @@ class OrsaTask(object):
                              shell=True)
         stdout, stderr = p.communicate()
         if stderr:
+            app.logger.info("Error:", stderr)
             raise ValueError(stderr)
 
     def _save(self):
@@ -171,4 +174,4 @@ def export_smiles():
 
 if __name__ == '__main__':
     app.debug = False
-    app.run(host='0.0.0.0', port=5859)
+    app.run(host='0.0.0.0', port=9191)
